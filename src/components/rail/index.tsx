@@ -6,44 +6,52 @@ interface Props {
   foods: IFoodData[];
 }
 
+const startTop = 100;
+const startLeft = 300;
+const midTop = 300;
+const midLeft = 100;
+const lastTop = 700;
+const lastLeft = 600;
+const firstAnimationTime = 2000;
+const secondAnimationTIme = 3000;
+const animationTimePer = 1000 / 60;
+
 const Rail = ({ foods }:Props) => {
 
   const foodsRef = useRef<HTMLUListElement>(null);
   const timerForCalculateLocation = useRef<any>();
+  
   // const timerForInsertFood = useRef<NodeJS.Timer>()
 
-  const calculate = (timeDiff:number, elLeft:number, elTop:number):[number,number] => {
-    let timePer = timeDiff / 5000;
-    let minY = 100, maxY = 500;
-    let minX = 300, midX = 100, maxX = 500;
-    
-    let nextY = elTop + timePer * (maxY - minY);
-    let nextX;
+  const calculate = (elLeft:number, elTop:number):[number,number] => {
+    let nextTop, nextLeft, topPer;
 
-    if (timeDiff <= 2000) {
-      nextX = Math.
-    } else {
-      nextX = elLeft + Math.sin((maxX - midX)*timePer*(nextY - elTop)) * 30;
+    if (elTop < midTop) { // firstAnimation
+      nextTop = elTop + (midTop - startTop) * animationTimePer / firstAnimationTime;
+      topPer = (nextTop - startTop) / (midTop - startTop);
+      nextLeft = elLeft - (Math.sin(Math.PI/2 + (Math.PI/2 * topPer)) + 0.01) * (startLeft - midLeft) * animationTimePer / firstAnimationTime;
+    }
+    else { // secondAnimation
+      nextTop = elTop + (lastTop - midTop) * animationTimePer / secondAnimationTIme;
+      topPer = (nextTop - midTop) / (lastTop - midTop);
+      nextLeft = elLeft + (Math.sin(topPer) + 0.01) * (lastLeft - midLeft) * animationTimePer / secondAnimationTIme;
     }
 
-    return [nextX, nextY];
+    return [nextLeft, nextTop];
   }
 
   const calculateLocation = useCallback(() => {
     const foods = [...Array.from((foodsRef.current as HTMLUListElement).children)] as HTMLLIElement[];
     foods.forEach((food) => {
-      const insertTime = Number((food as HTMLLIElement).dataset.inserttime);
-      const currentTime = new Date().getTime();
       const [left, top] = calculate(
-        currentTime - insertTime,
         Number(food.style.left.split('px')[0]),
         Number(food.style.top.split('px')[0])
       );
-
-      food.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+      food.style.left = `${left}px`;
+      food.style.top = `${top}px`;
     })
 
-    requestAnimationFrame(calculateLocation)
+    // requestAnimationFrame(calculateLocation)
   }, [])
 
   useEffect(() => {
@@ -56,15 +64,15 @@ const Rail = ({ foods }:Props) => {
     (foodsRef.current.firstChild as HTMLLIElement).style.left = '300px';
     (foodsRef.current.firstChild as HTMLLIElement).style.top = '100px';
 
-    // timerForCalculateLocation.current = setInterval(() => calculateLocation(), 1000 / 60);
+    timerForCalculateLocation.current = setInterval(() => calculateLocation(), animationTimePer);
     // timerForCalculateLocation.current = requestAnimationFrame(calculateLocation);
     
     // 특정 시간마다 음식을 넣어주는 작업이 필요하다
     // timerForInsertFood.current = setInterval(() => insertFood, 2000);
 
     return () => {
-      // clearInterval(timerForCalculateLocation.current);
-      cancelAnimationFrame(timerForCalculateLocation.current);
+      clearInterval(timerForCalculateLocation.current);
+      // cancelAnimationFrame(timerForCalculateLocation.current);
       // clearInterval(timerForInsertFood.current);
     }
   }, [])

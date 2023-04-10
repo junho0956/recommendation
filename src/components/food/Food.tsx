@@ -2,8 +2,7 @@ import styled from "styled-components";
 
 const Food = ({ food }:{ food:IFoodData }) => {
   return (
-    <Container
-    data-inserttime={new Date().getTime()}>
+    <Container>
 
     </Container>
   )
