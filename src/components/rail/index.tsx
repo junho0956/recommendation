@@ -1,6 +1,9 @@
 import styled from "styled-components";
 import Food from "../food/Food";
 import { useEffect, useRef, useCallback } from "react";
+import { screen } from "../../utils/screen";
+// import RailImg from './assets/image/foodRail.jpg';
+import RailImg from '../../assets/image/foodRail.jpg';
 
 interface Props {
   foods: IFoodData[];
@@ -89,8 +92,14 @@ const Rail = ({ foods }:Props) => {
 export default Rail;
 
 const Container = styled.div`
-  width: 100%;
-  height: 600px; // should this property is fixed
+  background-image: url(${RailImg});
+  background-size: cover;
+
+  @media ${screen.desktop} {
+    width: 839px;
+    height: 843px;
+  }
+
 `
 
 const Foods = styled.ul`

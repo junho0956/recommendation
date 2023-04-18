@@ -17,14 +17,11 @@ export default Layout;
 
 const Container = styled.div`
   position: relative;
-  width: 100%;
-  height: 100%;
 `
 
 const Wrapper = styled.div`
   @media ${screen.desktop} {
-    max-width: 630px;
-    min-width: 630px;
+    width: 839px;
     margin: 0 auto;
   }
   @media ${screen.mobile} {

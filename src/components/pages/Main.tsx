@@ -1,8 +1,10 @@
+import MainHeader from "components/main/MainHeader";
 import RailContainer from "../../container/Rail";
 
 const Main = () => {
   return (
-    <main style={{background:'#EEE', height: '100vh'}}>
+    <main style={{paddingTop:40}}>
+      <MainHeader />
       <RailContainer />
     </main>
   )
