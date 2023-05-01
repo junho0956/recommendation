@@ -1,12 +1,13 @@
 import React from 'react';
 import styled from "styled-components";
 import { screen } from '../../utils/screen';
+import { Outlet } from 'react-router-dom';
 
-const Layout = ({children}:React.PropsWithChildren<{}>) => {
+const Layout = () => {
   return (
     <Container>
       <Wrapper>
-        {children}
+        <Outlet />
       </Wrapper>
     </Container>
   )
