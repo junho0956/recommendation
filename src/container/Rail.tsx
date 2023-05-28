@@ -1,32 +1,13 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import Rail from "../components/rail";
-
-const dummyFoods:IFoodData[] = [
-    {
-      category: "korean",
-      name: 'food1'
-    },
-    {
-      category: "china",
-      name: 'food2'
-    },
-    {
-      category: "japan",
-      name: 'food3'
-    },
-    {
-      category: "korean",
-      name: 'food4'
-    },
-  ]
+import { getFoods } from "assets/common/db";
 
 const RailContainer = () => {
-  useEffect(() => {
 
-  }, []);
-
+  const [foods, _] = useState(getFoods())
+  
   return (
-    <Rail foods={dummyFoods} />
+    <Rail foods={foods} />
   )
 }
 

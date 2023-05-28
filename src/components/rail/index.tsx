@@ -1,89 +1,90 @@
+import { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import Food from "../food/Food";
-import { useEffect, useRef, useCallback } from "react";
-import { screen } from "../../utils/screen";
-// import RailImg from './assets/image/foodRail.jpg';
-import RailImg from '../../assets/image/foodRail.jpg';
+import { screen } from "../../assets/utils/screen";
+import RailImg from '../../assets/image/foodRail.png';
+import { useMobileContext } from "components/layout/Layout";
 
-interface Props {
-  foods: IFoodData[];
+const railConfig:IRailConfig = {
+  desktop: {
+    startTop: 0,
+    startLeft: 456,
+    midTop: 140,
+    midLeft: 220,
+    lastTop: 650,
+    lastLeft: 834 + 150,
+    firstAnimationTime: 5000,
+    secondAnimationTime: 7000,
+    animationTimePer: 1000 / 60
+  },
+  mobile: {
+    startTop: 100,
+    startLeft: 300,
+    midTop: 300,
+    midLeft: 100,
+    lastTop: 700,
+    lastLeft: 600,
+    firstAnimationTime: 2000,
+    secondAnimationTime: 3000,
+    animationTimePer: 1000 / 60
+  },
 }
 
-const startTop = 100;
-const startLeft = 300;
-const midTop = 300;
-const midLeft = 100;
-const lastTop = 700;
-const lastLeft = 600;
-const firstAnimationTime = 2000;
-const secondAnimationTIme = 3000;
-const animationTimePer = 1000 / 60;
+interface Props {
+  foods: IFood[];
+}
 
 const Rail = ({ foods }:Props) => {
 
-  const foodsRef = useRef<HTMLUListElement>(null);
-  const timerForCalculateLocation = useRef<any>();
-  
-  // const timerForInsertFood = useRef<NodeJS.Timer>()
+  const { state:mobileContextState } = useMobileContext();
+  const [config, setConfig] = useState(mobileContextState ? railConfig.mobile : railConfig.desktop);
 
-  const calculate = (elLeft:number, elTop:number):[number,number] => {
-    let nextTop, nextLeft, topPer;
+  const [currentFoods, setCurrentFoods] = useState<IFood[]>([]);
+  const [currentFoodIdx, setCurrentFoodIdx] = useState(0);
+  const timerForInsertFood = useRef<NodeJS.Timer>()
 
-    if (elTop < midTop) { // firstAnimation
-      nextTop = elTop + (midTop - startTop) * animationTimePer / firstAnimationTime;
-      topPer = (nextTop - startTop) / (midTop - startTop);
-      nextLeft = elLeft - (Math.sin(Math.PI/2 + (Math.PI/2 * topPer)) + 0.01) * (startLeft - midLeft) * animationTimePer / firstAnimationTime;
-    }
-    else { // secondAnimation
-      nextTop = elTop + (lastTop - midTop) * animationTimePer / secondAnimationTIme;
-      topPer = (nextTop - midTop) / (lastTop - midTop);
-      nextLeft = elLeft + (Math.sin(topPer) + 0.01) * (lastLeft - midLeft) * animationTimePer / secondAnimationTIme;
-    }
-
-    return [nextLeft, nextTop];
+  const insertFood = () => {
+    setCurrentFoods(prev => {
+      return prev.concat(foods[currentFoodIdx])
+    });
+    setCurrentFoodIdx(prev => {
+      if (prev+1 < foods.length) return prev+1;
+      return 0;
+    })
   }
 
-  const calculateLocation = useCallback(() => {
-    const foods = [...Array.from((foodsRef.current as HTMLUListElement).children)] as HTMLLIElement[];
-    foods.forEach((food) => {
-      const [left, top] = calculate(
-        Number(food.style.left.split('px')[0]),
-        Number(food.style.top.split('px')[0])
-      );
-      food.style.left = `${left}px`;
-      food.style.top = `${top}px`;
-    })
+  const removeFood = (foodId:string) => {
+    setCurrentFoods(prev => prev.filter(food => food.id !== foodId));
+  }
 
-    // requestAnimationFrame(calculateLocation)
-  }, [])
+  const initConfigByUserAgent = () => {
+    setConfig(mobileContextState ? railConfig.mobile : railConfig.desktop);
+  }
 
   useEffect(() => {
-    if(!foodsRef.current) return;
+    initConfigByUserAgent();
+  }, [mobileContextState])
 
-    // 유저는 기본적으로 60프레임을 애니메이션이라고 생각한다
-    // => 초당 60프레임 = 1000ms / 60fp
-    // 16초마다 위치를 계산하는 함수 1개
-
-    (foodsRef.current.firstChild as HTMLLIElement).style.left = '300px';
-    (foodsRef.current.firstChild as HTMLLIElement).style.top = '100px';
-
-    timerForCalculateLocation.current = setInterval(() => calculateLocation(), animationTimePer);
-    // timerForCalculateLocation.current = requestAnimationFrame(calculateLocation);
-    
-    // 특정 시간마다 음식을 넣어주는 작업이 필요하다
-    // timerForInsertFood.current = setInterval(() => insertFood, 2000);
+  useEffect(() => {
+    // 특정 시간마다 음식을 넣기
+    timerForInsertFood.current = setInterval(insertFood, 4000);
+    // insertFood();
 
     return () => {
-      clearInterval(timerForCalculateLocation.current);
-      // cancelAnimationFrame(timerForCalculateLocation.current);
-      // clearInterval(timerForInsertFood.current);
+      clearInterval(timerForInsertFood.current);
     }
-  }, [])
-
+  }, [currentFoodIdx])
+  console.log({currentFoods})
   return (
     <Container>
-      <Foods ref={foodsRef}>
-        <Food food={foods[0]} />
+      <Foods>
+        {currentFoods.map(food => (
+          <Food
+          key={food.id}
+          food={food}
+          config={config}
+          removeFood={removeFood} />
+        ))}
       </Foods>
     </Container>
   )
@@ -93,15 +94,19 @@ export default Rail;
 
 const Container = styled.div`
   background-image: url(${RailImg});
-  background-size: cover;
+  background-repeat: no-repeat;
+  position: absolute;
+  right: 0;
+  overflow: hidden;
 
-  @media ${screen.desktop} {
-    width: 839px;
-    height: 843px;
+  @media ${screen.desktop} { // rail img size
+    width: 757px;
+    height: 966px;
   }
 
 `
 
 const Foods = styled.ul`
   position: relative;
+
 `

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { screen } from "utils/screen";
+import { screen } from "assets/utils/screen";
 import fork from 'assets/image/fork.svg';
 import { Link } from 'react-router-dom';
 
@@ -25,7 +25,7 @@ export default MainHeader;
 
 const Header = styled.section`
   @media ${screen.desktop} {
-    margin-bottom: 11px;
+    margin-bottom: 200px;
   }
 `
 

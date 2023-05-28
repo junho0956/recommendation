@@ -1,0 +1,1 @@
+export const contextDispatch_setMobile = 'setMobile';
